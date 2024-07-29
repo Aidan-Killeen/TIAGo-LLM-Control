@@ -10,8 +10,11 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <ros/topic.h>
 
+
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_control_client;
 typedef boost::shared_ptr< arm_control_client>  arm_control_client_Ptr;
+
+//typedef actionlib::SimpleActionClient<pr2_controllers_msgs::Pr2GripperCommandAction> GripperClient;
 
 
 
@@ -37,6 +40,31 @@ void createArmClient(arm_control_client_Ptr& actionClient)
 
 }
 
+/*
+void createGripperClient(arm_control_client_Ptr& actionClient)
+{
+    ROS_INFO("Creating action client to gripper controller ...");
+    actionClient.reset(new arm_control_client("/parallel_gripper_controller/follow_joint_trajectory"));
+    //figure out size of this (Currently trying to use one node, but without joint name)
+    //actionClient.reset(new arm_control_client("/gripper_controller/command"));
+
+    int iterations = 0, max_iterations = 3;
+    while( !actionClient->waitForServer(ros::Duration(2.0)) && ros::ok() && iterations < max_iterations )
+    {
+        ROS_DEBUG("Waiting for the gripper_controller_action server to come up");
+        iterations++;
+    }
+
+
+    if(iterations == max_iterations)
+    {
+        throw std::runtime_error("Error in createArmClient: arm controller action server not available");
+    }
+    
+
+
+}
+*/
 
 void waypoints_arm_goal(control_msgs::FollowJointTrajectoryGoal& goal)
 {
@@ -74,12 +102,49 @@ void waypoints_arm_goal(control_msgs::FollowJointTrajectoryGoal& goal)
 
 
 }
-
-
-int joint_test(int argc, char ** argv) //check if this is right format
+/*
+void waypoints_gripper_goal(control_msgs::FollowJointTrajectoryGoal& goal)
 {
-    ros::init(argc, argv, "joint__test");
-    ROS_INFO_STREAM( "Starting  joint test...") ;
+    //goal.trajectory.joint_names.push_back("gripper_left_finger_joint");
+    //goal.trajectory.joint_names.push_back("gripper_right_finger_joint");
+
+    int waypoints = 1;
+
+    goal.trajectory.points.resize(waypoints);
+    for(int i=0; i< waypoints; i++)
+    {
+        goal.trajectory.points[i].positions.resize(1);
+
+        //set waypoint coords - max is .044 for fully open, .001 is min in contorller, but ssafe is probably .020
+        goal.trajectory.points[i].positions[0] = .020;  //make this take input from functionn input?
+        //goal.trajectory.points[i].positions[1] = .020;
+
+        //set velocities
+        goal.trajectory.points[i].velocities.resize(1);
+        for (int j = 0; j < 1; ++j)
+        {
+            goal.trajectory.points[i].velocities[j] = 1.0;
+        }
+
+        //set accelerations
+        //goal.trajectory.points[i].accelerations.resize(2);
+        //for (int j = 0; j < 2; ++j)
+        //{
+         //   goal.trajectory.points[i].accelerations[j] = 1.0;
+        //}
+
+        goal.trajectory.points[i].time_from_start = ros::Duration(2.0);
+    }
+
+    //ROS_INFO_STREAM(goal.trajectory) ;
+}
+**/
+//gripper joint names: gripper_left_finger_joint and gripper_right_finger_joint with /parallel_gripper_controller/follow_joint_trajectory topic
+
+int arm_joint_test()
+{
+
+    ROS_INFO_STREAM( "Starting arm joint test...") ;
     
     ros::NodeHandle nh;
     if (!ros::Time::waitForValid(ros::WallDuration(10.0)))
@@ -102,7 +167,40 @@ int joint_test(int argc, char ** argv) //check if this is right format
         ros::Duration(4).sleep(); // sleep for four seconds
     }
     
-
+    ROS_INFO_STREAM( "Arm joint test completed") ;
     return EXIT_SUCCESS;
 
 }
+
+/*
+int gripper_joint_test()
+{
+
+    ROS_INFO_STREAM( "Starting gripper joint test...") ;
+    
+    ros::NodeHandle nh;
+    if (!ros::Time::waitForValid(ros::WallDuration(10.0)))
+    {
+        ROS_FATAL("Timed-out waiting for valid time.");
+        return EXIT_FAILURE;
+    }
+    
+    arm_control_client_Ptr GripperClient;
+    createGripperClient(GripperClient);
+    
+    control_msgs::FollowJointTrajectoryGoal grip_goal;
+    waypoints_gripper_goal(grip_goal);
+    
+    grip_goal.trajectory.header.stamp = ros::Time::now() + ros::Duration(1.0);
+    GripperClient->sendGoal(grip_goal);
+
+    while(!(GripperClient->getState().isDone()) && ros::ok())
+    {
+        ros::Duration(4).sleep(); // sleep for four seconds
+    }
+    
+    ROS_INFO_STREAM( "Gripper joint test completed") ;
+    return EXIT_SUCCESS;
+
+}
+*/

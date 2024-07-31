@@ -6,5 +6,5 @@ Before this code is launched, a TIAGo simulation should already be running eg
     Note: ensure the simulation has "tuck_arm:=false", to avoid having to wait for the motion to finish playing
 
 To run, first run catkin_make in the terminal with this directory open, then run "source devel/setup.bash"
-Then run "rosrun controls node"
+Then run "roslaunch controls run.launch"
 Ensure roscore has been opened in a different terminal first

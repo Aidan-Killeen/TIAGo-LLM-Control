@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+     <node pkg="controls" type="python_test.py" name="python_test" required="false" />
+
+     <node pkg="controls" type="base_controls" name="base_controls" required="true"/>
+
+</launch>

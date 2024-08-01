@@ -138,11 +138,14 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 add_executable(
     ${PROJECT_NAME}_node src/controls_node.cpp ##src/arm_controls.cpp
-    #base_controls src/base_client.cpp
     )
 
 add_executable(
     base_controls src/base_client.cpp
+    )
+
+add_executable(
+    arm_controls src/arm_client.cpp
     )
 
 ## Rename C++ executable without prefix
@@ -162,6 +165,10 @@ target_link_libraries(${PROJECT_NAME}_node
 
 
 target_link_libraries(base_controls
+    ${catkin_LIBRARIES}
+)
+
+target_link_libraries(arm_controls
     ${catkin_LIBRARIES}
 )
 
@@ -188,7 +195,7 @@ catkin_install_python(PROGRAMS
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS base_controls#${PROJECT_NAME}
+install(TARGETS base_controls arm_controls#${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}

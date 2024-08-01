@@ -3,5 +3,6 @@
      <node pkg="controls" type="python_test.py" name="python_test" required="false" />
 
      <node pkg="controls" type="base_controls" name="base_controls" required="true"/>
+     <node pkg="controls" type="arm_controls" name="arm_controls" required="true"/>
 
 </launch>

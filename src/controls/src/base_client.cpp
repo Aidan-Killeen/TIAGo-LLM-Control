@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 {
     ros::init(argc, argv, "base_controls");
 
-    ROS_INFO("Initializing base_control node ...");
+    ROS_INFO("Initializing base_controls node ...");
 
     ros::NodeHandle nh;
     if (!ros::Time::waitForValid(ros::WallDuration(10.0))) // NOTE: Important when using simulated clock
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     ROS_DEBUG("Running movement Test...");
 
     base_forward(5);
-
+    //set up listener instead
     ROS_DEBUG("Test Complete!");
     ros:: spin();
 } 

@@ -10,6 +10,11 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <ros/topic.h>
 
+//Moveit - also needs string and ros, but nothing else
+#include <moveit/move_group_interface/move_group_interface.h>
+#include <vector>
+#include <map>
+
 
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_control_client;
 typedef boost::shared_ptr< arm_control_client>  arm_control_client_Ptr;
@@ -110,6 +115,65 @@ int arm_joint_test()
 
 }
 
+int move_it()
+{
+    std::map<std::string, double> target_position;
+    target_position["torso_lift_joint"] = 0.0;//atof(argv[1]);
+    target_position["arm_1_joint"] = 2.5;//atof(argv[2]);
+    target_position["arm_2_joint"] = 1.0;//atof(argv[3]);
+    target_position["arm_3_joint"] = 1.0;;//atof(argv[4]);
+    target_position["arm_4_joint"] = 1.0;//atof(argv[5]);
+    target_position["arm_5_joint"] = 1.0;//atof(argv[6]);
+    target_position["arm_6_joint"] = 1.0;//atof(argv[7]);
+    target_position["arm_7_joint"] = 1.0;//atof(argv[8]);
+
+    //ros::NodeHandle nh;
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+
+    std::vector<std::string> torso_arm_joint_names;
+    //select group of joints
+    //moveit::planning_interface::MoveGroup group_arm_torso("arm_torso");
+    moveit::planning_interface::MoveGroupInterface group_arm_torso("arm_torso");
+    //choose your preferred planner
+    group_arm_torso.setPlannerId("SBLkConfigDefault");
+
+    torso_arm_joint_names = group_arm_torso.getJoints();
+
+    group_arm_torso.setStartStateToCurrentState();
+    group_arm_torso.setMaxVelocityScalingFactor(1.0);
+
+    for (unsigned int i = 0; i < torso_arm_joint_names.size(); ++i)
+        if ( target_position.count(torso_arm_joint_names[i]) > 0 )
+        {
+            ROS_INFO_STREAM("\t" << torso_arm_joint_names[i] << " goal position: " << target_position[torso_arm_joint_names[i]]);
+            group_arm_torso.setJointValueTarget(torso_arm_joint_names[i], target_position[torso_arm_joint_names[i]]);
+        }
+
+    moveit::planning_interface::MoveGroupInterface::Plan my_plan;
+    //moveit::planning_interface::MoveGroup::Plan my_plan;
+    group_arm_torso.setPlanningTime(5.0);
+    //bool success = group_arm_torso.plan(my_plan);
+    bool success = static_cast<bool>(group_arm_torso.plan(my_plan));
+
+    if ( !success )
+        throw std::runtime_error("No plan found");
+
+    ROS_INFO_STREAM("Plan found in " << my_plan.planning_time_ << " seconds");
+
+    // Execute the plan
+    ros::Time start = ros::Time::now();
+
+    group_arm_torso.move();
+
+    ROS_INFO_STREAM("Motion duration: " << (ros::Time::now() - start).toSec());
+
+    spinner.stop();
+
+    return EXIT_SUCCESS;
+
+}
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "arm_controls");
@@ -124,7 +188,8 @@ int main(int argc, char** argv)
     }
     
 
-    arm_joint_test();
+    //arm_joint_test(); //basic controls
+    move_it();//using moveit instead
     //set up listener instead
     ros:: spin();
 } 

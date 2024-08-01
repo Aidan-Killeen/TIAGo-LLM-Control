@@ -10,6 +10,7 @@ project(controls)
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     rospy
+    moveit_ros_planning_interface
     geometry_msgs
     actionlib
     actionlib_msgs

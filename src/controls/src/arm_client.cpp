@@ -15,6 +15,9 @@
 #include <vector>
 #include <map>
 
+//subscriber
+#include "std_msgs/String.h"
+
 
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_control_client;
 typedef boost::shared_ptr< arm_control_client>  arm_control_client_Ptr;
@@ -115,17 +118,16 @@ int arm_joint_test()
 
 }
 
-int move_it()
+int move_it_arm(std::map<std::string, double> target_position)
 {
-    std::map<std::string, double> target_position;
-    target_position["torso_lift_joint"] = 0.0;//atof(argv[1]);
-    target_position["arm_1_joint"] = 2.5;//atof(argv[2]);
-    target_position["arm_2_joint"] = 1.0;//atof(argv[3]);
-    target_position["arm_3_joint"] = 1.0;;//atof(argv[4]);
-    target_position["arm_4_joint"] = 1.0;//atof(argv[5]);
-    target_position["arm_5_joint"] = 1.0;//atof(argv[6]);
-    target_position["arm_6_joint"] = 1.0;//atof(argv[7]);
-    target_position["arm_7_joint"] = 1.0;//atof(argv[8]);
+    
+    if ( target_position.size() < 8 )
+    {
+
+        ROS_INFO("\tmove_it_joint called on map with invalid number of elements");
+        ROS_INFO(" ");
+        return EXIT_FAILURE;
+    }
 
     //ros::NodeHandle nh;
     ros::AsyncSpinner spinner(1);
@@ -149,7 +151,7 @@ int move_it()
             ROS_INFO_STREAM("\t" << torso_arm_joint_names[i] << " goal position: " << target_position[torso_arm_joint_names[i]]);
             group_arm_torso.setJointValueTarget(torso_arm_joint_names[i], target_position[torso_arm_joint_names[i]]);
         }
-
+    ROS_INFO("Planning start...");
     moveit::planning_interface::MoveGroupInterface::Plan my_plan;
     //moveit::planning_interface::MoveGroup::Plan my_plan;
     group_arm_torso.setPlanningTime(5.0);
@@ -174,13 +176,40 @@ int move_it()
 
 }
 
+void motionCallback(const std_msgs::String::ConstPtr& msg)
+{
+
+    //control_msgs::FollowJointTrajectoryGoal arm_goal;
+    ROS_INFO("I heard: [%s]", msg->data.c_str());
+
+    std::map<std::string, double> target_position;
+    target_position["torso_lift_joint"] = 0.0;//atof(argv[1]);
+    target_position["arm_1_joint"] = 2.5;//atof(argv[2]);
+    target_position["arm_2_joint"] = 1.0;//atof(argv[3]);
+    target_position["arm_3_joint"] = 1.0;;//atof(argv[4]);
+    target_position["arm_4_joint"] = 1.0;//atof(argv[5]);
+    target_position["arm_5_joint"] = 1.0;//atof(argv[6]);
+    target_position["arm_6_joint"] = 1.0;//atof(argv[7]);
+    target_position["arm_7_joint"] = 1.0;//atof(argv[8]);
+    int num = atoi(msg->data.c_str());
+    ROS_INFO_STREAM("Motion duration: " << num);
+    if(num == 3)
+    {
+        move_it_arm(target_position);//using moveit instead
+    }
+    
+    
+}
+
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, "arm_controls");
+    ros::NodeHandle nh;
 
     ROS_INFO("Initializing arm_controls node ...");
 
-    ros::NodeHandle nh;
+    
     if (!ros::Time::waitForValid(ros::WallDuration(10.0))) // NOTE: Important when using simulated clock
     {
         ROS_FATAL("Timed-out waiting for valid time.");
@@ -189,7 +218,31 @@ int main(int argc, char** argv)
     
 
     //arm_joint_test(); //basic controls
-    move_it();//using moveit instead
+    /*
+    std::map<std::string, double> target_position;
+    target_position["torso_lift_joint"] = 0.0;//atof(argv[1]);
+    target_position["arm_1_joint"] = 2.5;//atof(argv[2]);
+    target_position["arm_2_joint"] = 1.0;//atof(argv[3]);
+    target_position["arm_3_joint"] = 1.0;;//atof(argv[4]);
+    target_position["arm_4_joint"] = 1.0;//atof(argv[5]);
+    target_position["arm_5_joint"] = 1.0;//atof(argv[6]);
+    target_position["arm_6_joint"] = 1.0;//atof(argv[7]);
+    target_position["arm_7_joint"] = 1.0;//atof(argv[8]);
+    move_it_arm(target_position);//using moveit instead
+    */
     //set up listener instead
-    ros:: spin();
+
+    ros::Subscriber sub = nh.subscribe("control_msgs",1000, motionCallback);
+    //ros::Subscriber sub = nh.subscribe("chatter", 1000, motionCallback);
+    //ros::Subscriber sub = nh.subscribe("chatter", 1000, chatterCallback);
+    ROS_INFO("Waiting for Msg ...");
+
+    ros::Rate rate(2);
+    while(ros::ok())
+    {
+        ros::spinOnce();
+        rate.sleep();
+    }
+    //ros:: spin();
+    ROS_INFO("Error");
 } 

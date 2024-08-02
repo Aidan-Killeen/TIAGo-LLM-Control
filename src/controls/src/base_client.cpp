@@ -71,7 +71,7 @@ int main(int argc, char** argv)
     }
     ROS_DEBUG("Running movement Test...");
 
-    base_forward(5);
+    //base_forward(5);
     //set up listener instead
     ROS_DEBUG("Test Complete!");
     ros:: spin();

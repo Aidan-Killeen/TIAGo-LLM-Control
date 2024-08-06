@@ -1,0 +1,9 @@
+float64[] coords
+float64 torso_lift_joint
+float64 arm_1_joint
+float64 arm_2_joint
+float64 arm_3_joint
+float64 arm_4_joint
+float64 arm_5_joint
+float64 arm_6_joint
+float64 arm_7_joint

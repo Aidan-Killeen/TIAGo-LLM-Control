@@ -17,6 +17,7 @@
 
 //subscriber
 #include "std_msgs/String.h"
+#include "controls/arm_position.h"
 
 
 typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> arm_control_client;
@@ -176,27 +177,36 @@ int move_it_arm(std::map<std::string, double> target_position)
 
 }
 
-void motionCallback(const std_msgs::String::ConstPtr& msg)
+void motionCallback(const controls::arm_position::ConstPtr& msg)
 {
 
     //control_msgs::FollowJointTrajectoryGoal arm_goal;
-    ROS_INFO("I heard: [%s]", msg->data.c_str());
+    //ROS_INFO("I heard: [%s]", msg->data.c_str());
+    ROS_INFO("Message Recieved");
+    //double[] coords = msg -> coords;
 
     std::map<std::string, double> target_position;
-    target_position["torso_lift_joint"] = 0.0;//atof(argv[1]);
-    target_position["arm_1_joint"] = 2.5;//atof(argv[2]);
-    target_position["arm_2_joint"] = 1.0;//atof(argv[3]);
-    target_position["arm_3_joint"] = 1.0;;//atof(argv[4]);
-    target_position["arm_4_joint"] = 1.0;//atof(argv[5]);
-    target_position["arm_5_joint"] = 1.0;//atof(argv[6]);
-    target_position["arm_6_joint"] = 1.0;//atof(argv[7]);
-    target_position["arm_7_joint"] = 1.0;//atof(argv[8]);
-    int num = atoi(msg->data.c_str());
-    ROS_INFO_STREAM("Motion duration: " << num);
-    if(num == 3)
-    {
-        move_it_arm(target_position);//using moveit instead
-    }
+    /**
+    target_position["torso_lift_joint"] = msg->coords[0];//0.0;//atof(argv[1]);
+    target_position["arm_1_joint"] = msg->coords[1];//2.5;//atof(argv[2]);
+    target_position["arm_2_joint"] = msg->coords[2];//1.0;//atof(argv[3]);
+    target_position["arm_3_joint"] = msg->coords[3];//1.0;;//atof(argv[4]);
+    target_position["arm_4_joint"] = msg->coords[4];//1.0;//atof(argv[5]);
+    target_position["arm_5_joint"] = msg->coords[5];//1.0;//atof(argv[6]);
+    target_position["arm_6_joint"] = msg->coords[6];//1.0;//atof(argv[7]);
+    target_position["arm_7_joint"] = msg->coords[7];//1.0;//atof(argv[8]);
+    */
+    target_position["torso_lift_joint"] = msg->torso_lift_joint;//0.0;//atof(argv[1]);
+    target_position["arm_1_joint"] = msg->arm_1_joint;//2.5;//atof(argv[2]);
+    target_position["arm_2_joint"] = msg->arm_2_joint;//1.0;//atof(argv[3]);
+    target_position["arm_3_joint"] = msg->arm_3_joint;//1.0;;//atof(argv[4]);
+    target_position["arm_4_joint"] = msg->arm_4_joint;//1.0;//atof(argv[5]);
+    target_position["arm_5_joint"] = msg->arm_5_joint;//1.0;//atof(argv[6]);
+    target_position["arm_6_joint"] = msg->arm_6_joint;//1.0;//atof(argv[7]);
+    target_position["arm_7_joint"] = msg->arm_7_joint;//1.0;//atof(argv[8]);
+    //int num = atoi(msg->data.c_str());
+    //ROS_INFO_STREAM("Motion duration: " << num
+    move_it_arm(target_position);
     
     
 }

@@ -47,11 +47,16 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   
+  
   <build_depend>message_generation</build_depend>
   <exec_depend>message_runtime</exec_depend>
 
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
+
+  <!-- Python dependencies -->
+  <depend>python-speechrecognition-pip</depend>
+  <depend>python3-pyaudio</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

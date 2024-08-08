@@ -6,5 +6,8 @@ Before this code is launched, a TIAGo simulation should already be running eg
     Note: ensure the simulation has "tuck_arm:=false", to avoid having to wait for the motion to finish playing
 
 To run, first run catkin_make in the terminal with this directory open, then run "source devel/setup.bash"
+
+If it is your first time running the code, you may have to run "rosdep install controls" to install all dependencies. You can check if you need to do so by running "rosdep check controls". Your system will need to have pip installed beforehand ("sudo apt install python3-pip")
+
 Then run "roslaunch controls run.launch"
 Ensure roscore has been opened in a different terminal first

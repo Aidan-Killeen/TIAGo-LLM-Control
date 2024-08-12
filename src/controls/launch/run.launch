@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <launch>
-     <node pkg="controls" type="python_test.py" name="python_test" required="false" />
+     <node pkg="controls" type="python_test.py" name="python_test" required="true" output="screen"/>
      
 
      <node pkg="controls" type="base_controls" name="base_controls" required="true"/>
      <node pkg="controls" type="arm_controls" name="arm_controls" required="true"/>
 
      <arg name="node_start_delay" default="1.0" />  
-     <node pkg="controls" type="node" name="node" required="false" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
+     <!-- <node pkg="controls" type="node" name="node" required="false" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/> -->
 
 </launch>

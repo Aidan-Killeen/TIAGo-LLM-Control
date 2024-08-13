@@ -22,7 +22,7 @@ asound = cdll.LoadLibrary('libasound.so')
 # Set error handler
 asound.snd_lib_error_set_handler(c_error_handler)
 
-def talker(command, arm_pub):
+def interpreter(command, arm_pub):
     
     msg = arm_position()
     if "test" in command:
@@ -39,18 +39,25 @@ def talker(command, arm_pub):
 
         rospy.loginfo(msg)
         arm_pub.publish(msg)
-    return
 
-if __name__ == "__main__":
-    
+    if "forward" in command:
+        pass
+    elif "backward" in command:
+        pass
+
+    if "quit" in command:
+        return True
+    return False
+
+def listener():
     #Speech Rec Setup
     r = sr.Recognizer()
     mic = sr.Microphone()
 
     i = 0
+    quit = False
 
     #ROS Setup
-    pub = rospy.Publisher('chatter', String, queue_size=10)
     arm_pub = rospy.Publisher('control_msgs', arm_position, queue_size=1000)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10)
@@ -59,7 +66,7 @@ if __name__ == "__main__":
         #i=i+1
 
         #with mic as source:
-        while not rospy.is_shutdown():
+        while not rospy.is_shutdown() and not quit:
             i=i+1
             r.adjust_for_ambient_noise(source)
             print("Talk")
@@ -69,12 +76,15 @@ if __name__ == "__main__":
             try:
                 # using google speech recognition
                 text = r.recognize_google(audio)
-                print(i, "Text: "+ text)
-                #pub.publish(text)
-                talker(text, arm_pub)
+                print(i, "Your voice command has been recognised as: "+ text)
+                quit = interpreter(text, arm_pub)
             except Exception as e:
                 print(i, "Sorry, I did not get that", e)
 
             rate.sleep()
-    
 
+if __name__ == "__main__":
+    try:
+        listener()
+    except rospy.ROSInterruptException:
+        pass

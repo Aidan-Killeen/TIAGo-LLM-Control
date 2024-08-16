@@ -1,0 +1,2 @@
+float64 rad_rotate
+bool clockwise

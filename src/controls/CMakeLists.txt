@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
     geometry_msgs
     actionlib
     actionlib_msgs
+    nav_msgs
     std_msgs
     message_generation
 )
@@ -55,6 +56,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   arm_position.msg
+  Turn.msg
 #   Message2.msg
 )
 
@@ -189,7 +191,7 @@ target_link_libraries(arm_controls
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
    scripts/voice_controls.py
-   
+   scripts/rotation_client.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

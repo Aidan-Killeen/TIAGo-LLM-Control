@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <launch>
      <node pkg="controls" type="voice_controls.py" name="voice_controls" required="true" output="screen"/>
+     <node pkg="controls" type="rotation_client.py" name="rotation_controls" required="true" output="screen"/>
      
 
      <node pkg="controls" type="base_controls" name="base_controls" required="true"/>

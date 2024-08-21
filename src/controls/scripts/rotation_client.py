@@ -46,6 +46,13 @@ def start_rotation(msg):
         r.sleep()
         if (abs(target_rad-yaw) < .01):
             break
+        #Edge cases - transition between positiive and negative values
+        
+        if (abs(target_rad) == math.pi and abs(-target_rad-yaw) < .01):
+            break
+
+        
+
 
     rot_msg.angular.z = 0  #set some way to guarantee which diirection it is going by setting +/-
     pub.publish(rot_msg)
@@ -58,11 +65,12 @@ def rotation():
     sub = rospy.Subscriber ('mobile_base_controller/odom', Odometry, get_rotation)
     sub2 = rospy.Subscriber ('rot_input', Turn, start_rotation)
 
-    rospy.sleep(1)
-    msg = Turn()
-    msg.clockwise = True
-    msg.rad_rotate = math.pi/2
-    start_rotation(msg)
+    # rospy.sleep(1)
+    # msg = Turn()
+    # msg.clockwise = True
+    # msg.rad_rotate = math.pi/2
+    # start_rotation(msg)
+    rospy.spin()
 
 if __name__ == "__main__":
     try:

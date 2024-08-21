@@ -4,11 +4,19 @@ from nav_msgs.msg import Odometry
 from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Twist
 from controls.msg import Turn
+from std_msgs.msg import Bool
 import math
 
 roll = pitch = yaw = 0.0
 clockwise = True
 target = 0
+
+def unpause(pause_pub):
+    #pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
+    msg = Bool()
+    msg.data = False
+    pause_pub.publish(msg)
+    print("Voice rec unpaused")
 
 def get_rotation (msg):
     global roll, pitch, yaw
@@ -20,6 +28,7 @@ def get_rotation (msg):
 def start_rotation(msg):
     rot_msg =Twist()
     pub = rospy.Publisher('mobile_base_controller/cmd_vel', Twist, queue_size=10)
+    pause_pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
 
     global clockwise
     clockwise = msg.clockwise
@@ -50,13 +59,10 @@ def start_rotation(msg):
         
         if (abs(target_rad) == math.pi and abs(-target_rad-yaw) < .01):
             break
-
-        
-
-
+    
     rot_msg.angular.z = 0  #set some way to guarantee which diirection it is going by setting +/-
     pub.publish(rot_msg)
-
+    unpause(pause_pub)
     return
 
 def rotation():

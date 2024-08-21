@@ -1,9 +1,11 @@
 import rospy
 import speech_recognition as sr
 from std_msgs.msg import String
+from std_msgs.msg import Bool
 from controls.msg import arm_position
 from controls.msg import Turn
 import math
+import threading
 
 #Extraneous Error clean up
 from ctypes import *
@@ -26,55 +28,78 @@ asound.snd_lib_error_set_handler(c_error_handler)
 
 safe = True #Used to enable safe mode, avoiding any issues from lack of safeties
 
+paused = False
+# def pause():
+#     print("Movement paused")
+#     global paused
+#     paused = True
+    
+#     while paused:
+#         msg = rospy.wait_for_message('controls_pause', Bool, timeout=None)
+#         print(msg.data)
+#         paused = msg.data
+
+#     print("Resumed")
+
+def unpause(msg):
+    global paused
+    paused = msg.data
+    print("Movement controls renabled:", not paused)
+
+
 def interpreter(command, arm_pub, turn_pub):
+    global paused
+    if not paused:
+        if "test" in command:
+            print("Arm Test Initialised")
+            #msg.coords = []
+            msg = arm_position()
+            msg.torso_lift_joint = 0.0
+            msg.arm_1_joint = 2.5
+            msg.arm_2_joint = 1.0
+            msg.arm_3_joint = 1.0
+            msg.arm_4_joint = 1.0
+            msg.arm_5_joint = 1.0
+            msg.arm_6_joint = 1.0
+            msg.arm_7_joint = 1.0
 
-    if "test" in command:
-        print("Arm Test Initialised")
-        #msg.coords = []
-        msg = arm_position()
-        msg.torso_lift_joint = 0.0
-        msg.arm_1_joint = 2.5
-        msg.arm_2_joint = 1.0
-        msg.arm_3_joint = 1.0
-        msg.arm_4_joint = 1.0
-        msg.arm_5_joint = 1.0
-        msg.arm_6_joint = 1.0
-        msg.arm_7_joint = 1.0
+            #rospy.loginfo(msg)
+            arm_pub.publish(msg)
 
-        rospy.loginfo(msg)
-        arm_pub.publish(msg)
+        if "forward" in command:
+            pass
+        elif "backward" in command:
+            pass
+        elif "turn" in command and not safe:
+            #Bugfix needed - turn around can cause loop because of swappinng between pos and negative numbers
+                #add edge case if Target > math.pi or < math.pi
+            #Safeties needed - tuck arm before turn? use IR  sensors to avoid moving?
+            print("Turn Test Initialised")
+            msg = Turn()
 
-    if "forward" in command:
-        pass
-    elif "backward" in command:
-        pass
-    elif "turn" in command and not safe:
-        #Bugfix needed - turn around can cause loop because of swappinng between pos and negative numbers
-            #add edge case if Target > math.pi or < math.pi
-        #Safeties needed - tuck arm before turn? use IR  sensors to avoid moving?
-        print("Turn Test Initialised")
-        msg = Turn()
+            #Rotation Direction
+            if "right" in command:           
+                msg.clockwise = True           
+            elif "left" in command:
+                msg.clockwise = False
+            else:
+                msg.clockwise = True
 
-        #Rotation Direction
-        if "right" in command:           
-            msg.clockwise = True           
-        elif "left" in command:
-            msg.clockwise = False
-        else:
-            msg.clockwise = True
-
-        #Amount of Rotation
-        if "slight" in command:
-            msg.rad_rotate = math.pi/4
-        elif "around" in command:
-            msg.rad_rotate = math.pi
-        else:
-            msg.rad_rotate = math.pi/2
-        turn_pub.publish(msg)
+            #Amount of Rotation
+            if "slight" in command:
+                msg.rad_rotate = math.pi/4
+            elif "around" in command:
+                msg.rad_rotate = math.pi
+            else:
+                msg.rad_rotate = math.pi/2
+            turn_pub.publish(msg)
+            #pause()
+            paused = True
 
     if "quit" in command:
         return True
     return False
+
 
 def listener():
     #Speech Rec Setup
@@ -88,9 +113,12 @@ def listener():
     arm_pub = rospy.Publisher('control_msgs', arm_position, queue_size=1000)
     turn_pub = rospy.Publisher('rot_input', Turn, queue_size=1000)
     rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10)
+    sub_pause = rospy.Subscriber ('controls_pause', Bool, unpause, queue_size=10)
+    #thread = threading.Thread(target=spin_thread)
+    #thread.start()
+
+    #Toggle Safe Mode  
     global safe
-    #print("Run in Safe Mode? (y/n)")
     while True:
         mode = input("Run in Safe Mode? (y/n) ").casefold()
         if mode == "y":
@@ -101,6 +129,7 @@ def listener():
         else:
             print("Error: you must enter 'y' or 'n'")
 
+    rate = rospy.Rate(10)
     with mic as source:
         #i=i+1
 
@@ -121,7 +150,8 @@ def listener():
             except Exception as e:
                 print(i, "Sorry, I did not get that", e)
 
-            rate.sleep()
+            #rate.sleep()
+            rospy.sleep(rospy.Duration(nsecs=1000))
 
 if __name__ == "__main__":
     try:

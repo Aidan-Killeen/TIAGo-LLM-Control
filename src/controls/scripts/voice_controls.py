@@ -27,8 +27,7 @@ asound.snd_lib_error_set_handler(c_error_handler)
 safe = True #Used to enable safe mode, avoiding any issues from lack of safeties
 
 def interpreter(command, arm_pub, turn_pub):
-    
-    
+
     if "test" in command:
         print("Arm Test Initialised")
         #msg.coords = []
@@ -90,6 +89,17 @@ def listener():
     turn_pub = rospy.Publisher('rot_input', Turn, queue_size=1000)
     rospy.init_node('talker', anonymous=True)
     rate = rospy.Rate(10)
+    global safe
+    #print("Run in Safe Mode? (y/n)")
+    while True:
+        mode = input("Run in Safe Mode? (y/n) ").casefold()
+        if mode == "y":
+            break
+        elif mode == "n":
+            safe = False
+            break
+        else:
+            print("Error: you must enter 'y' or 'n'")
 
     with mic as source:
         #i=i+1

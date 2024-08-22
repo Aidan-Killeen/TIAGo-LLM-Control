@@ -41,24 +41,33 @@ def start_rotation(msg):
     else:
         target_rad = yaw + rotate
 
+    #Resolving errors from transition between pos and negative
+    clock_targ = target_rad + 2*math.pi
+    anti_targ = target_rad - 2*math.pi
+
     r = rospy.Rate(10)
     i = 0
     while not rospy.is_shutdown():
-        diff = target_rad - yaw
+        diff1 = target_rad - yaw
+        diff2 = clock_targ - yaw
+        diff3 = anti_targ - yaw
+
+        diff = min([diff1, diff2, diff3], key=abs)
+
 
         if (i% 10 == 0):
             rot_msg.angular.z = min([diff, max_rot], key=abs)  #set some way to guarantee which diirection it is going by setting +/-
         pub.publish(rot_msg)
-        print(f"target: {target_rad} current: {yaw}")
+        print(f"target: {target_rad} current: {yaw} diff{diff}")
 
         i+=1
         r.sleep()
-        if (abs(target_rad-yaw) < .01):
+        if (abs(diff) < .01):
             break
         #Edge cases - transition between positiive and negative values
         
-        if (abs(target_rad) == math.pi and abs(-target_rad-yaw) < .01):
-            break
+        # if (abs(target_rad) == math.pi and abs(-target_rad-yaw) < .01):
+        #     break
     
     rot_msg.angular.z = 0  #set some way to guarantee which diirection it is going by setting +/-
     pub.publish(rot_msg)

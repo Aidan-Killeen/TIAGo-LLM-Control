@@ -71,8 +71,6 @@ def interpreter(command, arm_pub, turn_pub):
         elif "backward" in command:
             pass
         elif "turn" in command and not safe:
-            #Bugfix needed - turn around can cause loop because of swappinng between pos and negative numbers
-                #add edge case if Target > math.pi or < math.pi
             #Safeties needed - tuck arm before turn? use IR  sensors to avoid moving?
             print("Turn Test Initialised")
             msg = Turn()
@@ -140,7 +138,7 @@ def listener():
             
             try:
                 print("Talk")
-                #audio = r.listen(source)        #this seems to pause during turning
+                #audio = r.listen(source)
                 audio = r.listen(source, 10, 5) #apparently, only one instance of each listener function can run - trying to rlaunch mid action is ignored
                 print("Time over, thanks")
                 # using google speech recognition
@@ -150,8 +148,8 @@ def listener():
             except Exception as e:
                 print(i, "Sorry, I did not get that", e)
 
-            #rate.sleep()
-            rospy.sleep(rospy.Duration(nsecs=1000))
+            rate.sleep()
+            #rospy.sleep(rospy.Duration(nsecs=1000))
 
 if __name__ == "__main__":
     try:

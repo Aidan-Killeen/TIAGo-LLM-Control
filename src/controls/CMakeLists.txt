@@ -146,9 +146,6 @@ include_directories(
 #     ${PROJECT_NAME}_node src/controls_node.cpp ##src/arm_controls.cpp
 #     )
 
-add_executable(
-    base_controls src/base_client.cpp
-    )
 
 add_executable(
     arm_controls src/arm_client.cpp
@@ -172,10 +169,6 @@ add_dependencies(arm_controls ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPOR
 # )
 
 
-target_link_libraries(base_controls
-    ${catkin_LIBRARIES}
-)
-
 target_link_libraries(arm_controls
     ${catkin_LIBRARIES}
 )
@@ -191,7 +184,7 @@ target_link_libraries(arm_controls
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
    scripts/voice_controls.py
-   scripts/rotation_client.py
+   scripts/base_client.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -203,7 +196,7 @@ catkin_install_python(PROGRAMS
 
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
-install(TARGETS base_controls arm_controls#${PROJECT_NAME}
+install(TARGETS arm_controls#${PROJECT_NAME}
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_GLOBAL_BIN_DESTINATION}

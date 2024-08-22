@@ -5,6 +5,7 @@ from tf.transformations import euler_from_quaternion, quaternion_from_euler
 from geometry_msgs.msg import Twist
 from controls.msg import Turn
 from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 import math
 
 roll = pitch = yaw = 0.0
@@ -74,11 +75,34 @@ def start_rotation(msg):
     unpause(pause_pub)
     return
 
+def start_mov(msg):
+    sec = msg.data
+
+    pub = rospy.Publisher('mobile_base_controller/cmd_vel', Twist, queue_size=10)
+    pause_pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
+    mov_msg = Twist()
+
+    speed = .5
+    hz = 10
+    i = 0
+    r = rospy.Rate(hz)
+
+    while not rospy.is_shutdown() and i < hz*sec:
+        mov_msg.linear.x = speed
+        pub.publish(mov_msg)
+        r.sleep()
+        i+=1
+    
+    mov_msg.linear.x = 0
+    pub.publish(mov_msg)
+    unpause(pause_pub)
+
 def rotation():
     rospy.init_node('rotation_controls')
 
     sub = rospy.Subscriber ('mobile_base_controller/odom', Odometry, get_rotation)
     sub2 = rospy.Subscriber ('rot_input', Turn, start_rotation)
+    sub3 = rospy.Subscriber ('mov_input', Int32, start_mov)
 
     # rospy.sleep(1)
     # msg = Turn()

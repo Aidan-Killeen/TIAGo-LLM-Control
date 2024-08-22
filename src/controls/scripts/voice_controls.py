@@ -2,6 +2,7 @@ import rospy
 import speech_recognition as sr
 from std_msgs.msg import String
 from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 from controls.msg import arm_position
 from controls.msg import Turn
 import math
@@ -47,7 +48,7 @@ def unpause(msg):
     print("Movement controls renabled:", not paused)
 
 
-def interpreter(command, arm_pub, turn_pub):
+def interpreter(command, arm_pub, turn_pub, mov_pub):
     global paused
     if not paused:
         if "test" in command:
@@ -66,8 +67,12 @@ def interpreter(command, arm_pub, turn_pub):
             #rospy.loginfo(msg)
             arm_pub.publish(msg)
 
-        if "forward" in command:
-            pass
+        if "forward" in command and not safe:
+            print("Short forward motion Initialised")
+            msg = Int32()
+            msg.data = 2
+            mov_pub.publish(msg)
+            paused = True
         elif "backward" in command:
             pass
         elif "turn" in command and not safe:
@@ -109,7 +114,10 @@ def listener():
 
     #ROS Setup
     arm_pub = rospy.Publisher('control_msgs', arm_position, queue_size=1000)
+
+    #Combine Turn and Mov?
     turn_pub = rospy.Publisher('rot_input', Turn, queue_size=1000)
+    mov_pub = rospy.Publisher('mov_input', Int32, queue_size=1000)
     rospy.init_node('talker', anonymous=True)
     sub_pause = rospy.Subscriber ('controls_pause', Bool, unpause, queue_size=10)
     #thread = threading.Thread(target=spin_thread)
@@ -144,7 +152,7 @@ def listener():
                 # using google speech recognition
                 text = r.recognize_google(audio)
                 print(i, "Your voice command has been recognised as: "+ text)
-                quit = interpreter(text, arm_pub, turn_pub)
+                quit = interpreter(text, arm_pub, turn_pub, mov_pub)
             except Exception as e:
                 print(i, "Sorry, I did not get that", e)
 

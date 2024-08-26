@@ -47,6 +47,24 @@ def unpause(msg):
     paused = msg.data
     print("Movement controls renabled:", not paused)
 
+def UI():
+    global paused
+    global safe
+    print("Please speak a combination of command words:\n")
+    print("Available commands:")
+    if(not paused):
+        print("\tArm controls: test")
+    if(not safe and not paused):
+        print("\tGeneral Movement: forward, backward, turn")
+        print("\t\tTurning modifiers: left, right, slightly, around")
+
+    print("\tSystem: quit")
+
+
+
+
+
+
 
 def interpreter(command, arm_pub, turn_pub, mov_pub):
     global paused
@@ -145,7 +163,7 @@ def listener():
             r.adjust_for_ambient_noise(source)
             
             try:
-                print("Talk")
+                UI()
                 #audio = r.listen(source)
                 audio = r.listen(source, 10, 5) #apparently, only one instance of each listener function can run - trying to rlaunch mid action is ignored
                 print("Time over, thanks")

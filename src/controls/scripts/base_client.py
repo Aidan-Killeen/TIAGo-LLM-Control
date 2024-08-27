@@ -6,11 +6,13 @@ from geometry_msgs.msg import Twist
 from controls.msg import Turn
 from std_msgs.msg import Bool
 from std_msgs.msg import Int32
+from sensor_msgs.msg import LaserScan
 import math
 
 roll = pitch = yaw = 0.0
 clockwise = True
 target = 0
+safe_dist = True
 
 def unpause(pause_pub):
     #pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
@@ -87,22 +89,42 @@ def start_mov(msg):
     i = 0
     r = rospy.Rate(hz)
 
-    while not rospy.is_shutdown() and i < hz*sec:
+    while not rospy.is_shutdown() and i < hz*sec and safe_dist:
         mov_msg.linear.x = speed
         pub.publish(mov_msg)
         r.sleep()
         i+=1
-    
+    if not safe_dist:
+        print("Movement Aborted: Something is too close to the robot")
     mov_msg.linear.x = 0
     pub.publish(mov_msg)
     unpause(pause_pub)
 
+def get_dist(msg):
+    global safe_dist
+    count = 0
+    for x in msg.ranges:
+        if x <=.1:
+            count+=4
+        if x <= .5:
+            count+=1
+ 
+    
+    if count/len(msg.ranges) >.10:
+        safe_dist = False
+    else:
+        safe_dist = True
+    print(f"count: {count} safe: {safe_dist}")
+
 def rotation():
     rospy.init_node('rotation_controls')
+    rospy.loginfo('Launching base client')
 
-    sub = rospy.Subscriber ('mobile_base_controller/odom', Odometry, get_rotation)
-    sub2 = rospy.Subscriber ('rot_input', Turn, start_rotation)
-    sub3 = rospy.Subscriber ('mov_input', Int32, start_mov)
+    sub_odom = rospy.Subscriber ('mobile_base_controller/odom', Odometry, get_rotation)
+    sub_turn = rospy.Subscriber ('rot_input', Turn, start_rotation)
+    sub_mov = rospy.Subscriber ('mov_input', Int32, start_mov)
+    sub_sense = rospy.Subscriber ('scan', LaserScan, get_dist)
+
 
     # rospy.sleep(1)
     # msg = Turn()

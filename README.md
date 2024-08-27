@@ -27,10 +27,12 @@ This code is intended to let the user control a TIAGo Robot by using a LLM to in
         > catkin_make
 
 ## Running Code
-1. Launch a [TIAGo Simulation](http://wiki.ros.org/Robots/TIAGo/Tutorials/Installation/Testing_simulation) or connect to the physical robot
+1. Launch a [TIAGo Simulation](http://wiki.ros.org/Robots/TIAGo/Tutorials/Installation/Testing_simulation) or connect to the physical robot. Below is an adjusted command to raise the simulation, with a breakdown of why it should be used.
     - Simulation Example: 
-        > roslaunch tiago_gazebo tiago_gazebo.launch public_sim:=true tuck_arm:=false end_effector:=pal-gripper world:=empty
-        - This example has "tuck_arm:=false", to avoid having to wait for the motion to finish playing
+        > roslaunch tiago_2dnav_gazebo tiago_mapping.launch public_sim:=true end_effector:=pal-gripper rviz:=false tuck_arm:=false world:=empty
+        - You should use tiago_2dnav_gazebo, as the default tiago_gazebo does not advertise the /scan topic, which is required to prevent collisions.
+        - Optional: "rviz:=false" - prevents rviz from being launched, which is used to create a map based off of the sensors.
+        - Optional: "tuck_arm:=false", to avoid having to wait for the motion to finish playing when first launching
 2. Launch this code
     - Each time a new terminal is opened, you need to first run the following for ros to locate your package:
         > source devel/setup.bash

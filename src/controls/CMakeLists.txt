@@ -16,6 +16,7 @@ find_package(catkin REQUIRED COMPONENTS
     actionlib_msgs
     nav_msgs
     std_msgs
+    sensor_msgs
     message_generation
 )
 

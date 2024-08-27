@@ -30,17 +30,6 @@ asound.snd_lib_error_set_handler(c_error_handler)
 safe = True #Used to enable safe mode, avoiding any issues from lack of safeties
 
 paused = False
-# def pause():
-#     print("Movement paused")
-#     global paused
-#     paused = True
-    
-#     while paused:
-#         msg = rospy.wait_for_message('controls_pause', Bool, timeout=None)
-#         print(msg.data)
-#         paused = msg.data
-
-#     print("Resumed")
 
 def unpause(msg):
     global paused
@@ -86,7 +75,9 @@ def interpreter(command, arm_pub, turn_pub, mov_pub):
             arm_pub.publish(msg)
 
         if "forward" in command and not safe:
-            print("Short forward motion Initialised")
+            print("Unsafe forward motion Initialised")
+            # To be added to safe code, would need Sensors to be able to detect potential collision with narrow objects 
+            #   (Currently poles or strings could cause issues)
             msg = Int32()
             msg.data = 2
             mov_pub.publish(msg)
@@ -94,8 +85,9 @@ def interpreter(command, arm_pub, turn_pub, mov_pub):
         elif "backward" in command:
             pass
         elif "turn" in command and not safe:
-            #Safeties needed - tuck arm before turn? use IR  sensors to avoid moving?
-            print("Turn Test Initialised")
+            print("Unsafe Turn Initialised")
+            # To be added to safe code, would have to tuck arm before rotation, or be able to detect if arm is about to collide with something
+            # Alternatively, could refuse to turn if something is detected too close
             msg = Turn()
 
             #Rotation Direction

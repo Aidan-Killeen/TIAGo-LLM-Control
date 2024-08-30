@@ -8,7 +8,7 @@
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
   <maintainer email="killeen@todo.todo">Aidan Killeen</maintainer>
-  <maintainer email="killeen@todo.todo">Rajesh</maintainer>
+  <maintainer email="unknown@todo.todo">Rajesh</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -54,6 +54,7 @@
   <depend>geometry_msgs</depend>
   <depend>std_msgs</depend>
   <depend>nav_msgs</depend>
+  <depend>sensor_msgs</depend>
 
   <!-- Python dependencies -->
   <depend>python-speechrecognition-pip</depend>

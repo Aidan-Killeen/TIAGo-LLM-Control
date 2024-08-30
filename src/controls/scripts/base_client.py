@@ -77,11 +77,10 @@ def start_rotation(msg):
     unpause(pause_pub)
     return
 
+pub = rospy.Publisher('mobile_base_controller/cmd_vel', Twist, queue_size=10)
+pause_pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
 def start_mov(msg):
     sec = msg.data
-
-    pub = rospy.Publisher('mobile_base_controller/cmd_vel', Twist, queue_size=10)
-    pause_pub = rospy.Publisher('controls_pause', Bool, queue_size=10)
     mov_msg = Twist()
 
     speed = .5
@@ -102,19 +101,23 @@ def start_mov(msg):
 
 def get_dist(msg):
     global safe_dist
-    count = 0
-    for x in msg.ranges:
-        if x <=.1:
-            count+=4
-        if x <= .5:
-            count+=1
- 
+    try:
+        count = 0
+        for x in msg.ranges:
+            if x <=.1:
+                count+=4
+            if x <= .5:
+                count+=1
     
-    if count/len(msg.ranges) >.10:
-        safe_dist = False
-    else:
+        
+        if count/len(msg.ranges) >.10:
+            safe_dist = False
+        else:
+            safe_dist = True
+        print(f"count: {count} safe: {safe_dist}")
+    except Exception as e:
         safe_dist = True
-    print(f"count: {count} safe: {safe_dist}")
+        print("Sensor Error:", e, "\nReverting safe_dist to True")
 
 def rotation():
     rospy.init_node('rotation_controls')

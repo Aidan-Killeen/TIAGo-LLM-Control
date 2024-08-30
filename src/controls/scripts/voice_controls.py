@@ -60,7 +60,7 @@ def interpreter(command, arm_pub, turn_pub, mov_pub):
     if not paused:
         if "test" in command:
             print("Arm Test Initialised")
-            #msg.coords = []
+            #Should have a series of different arm poses with individual commands
             msg = arm_position()
             msg.torso_lift_joint = 0.0
             msg.arm_1_joint = 2.5
